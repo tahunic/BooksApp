@@ -7,19 +7,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextPaint;
+import android.util.Log;
 import android.view.ViewTreeObserver;
+
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class BookActivity extends AppCompatActivity {
 
-    DbHelper dbHelper;
-
     @BindView(R.id.pages)
     ViewPager pagesView;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
+    private DbHelper dbHelper;
+    private HashMap<String, Integer> chapterPages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +35,7 @@ public class BookActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Title");
 
         dbHelper = new DbHelper(this);
 //        dbHelper.insertData("Rječitost Kur’ana i istinite radosne vijesti" , ", neka je mir i spasResulullahu, sallallahu alejhi ve sellem, njegovojčasnoj porodici, drugovima i svim njegovim sljedbenicima.U ovoj knjizi kazujemo o najstrpljivijem zatvoreniku uhistoriji. Moleći Svemogućeg Allaha za pomoć, detalje kazivanja crpit ćemo iz časnoga Kur’ana, najjače veze, vječneKnjige, velike Poslanikove, sallallahu alejhi ve sellem, mudžize, upute, svjetlosti, lijeka, milosti, opomene, velikog ikategoričnog dokaza i objašnjenja svega.Izabrao sam kazivanje o Jusufu, alejhis-selam, jer je onojedno od najljepših kazivanja. Štaviše, mnogi učenjaci reklisu da nisu čuli za poučnije i ljepše kazivanje.“Objavljujući ti ovaj Kur’an, Mi tebi o najljepšim događajima kazujemo…” Kažu da je to najljepše kazivanjejer govori o vjerovjesništvu i poslanstvu, kraljevima, trgovini, zatočeništvu, teškoći, izbavljenju, bogatstvu, siromaštvu, grijehu, pokajanju, snovima, stvarnosti; osuđuje razvrat, hvali čednost… Najljepše, jer se sve što je u njemuspomenuto završilo na najljepši način i sretno: poslanik Jusuf, alejhis-selam, od zatvora, preko ugnjetavanja, dospio jedo poslanstva i vlasti, njegovog oca Jakuba, alejhis-selam,Allah, dželle šanuhu, odabrao je i dao da se sjedini njegova");
@@ -195,13 +203,18 @@ public class BookActivity extends AppCompatActivity {
                 TextPaint textPaint = new TextPaint();
                 textPaint.setTextSize(getResources().getDimension(R.dimen.text_size));
 
+                chapterPages = new HashMap<>();
+
                 Cursor result = dbHelper.getData();
                 if(result.getCount() != 0){
                     while(result.moveToNext()){
                         if(result.getString(3).contentEquals("VodicKrozZivot")){
                             textPaint.setFakeBoldText(true);
 
-                            pageSplitter.append(result.getString(1) + "\n\n", textPaint);
+                            String title = result.getString(1);
+                            pageSplitter.append(title + "\n\n", textPaint);
+                            chapterPages.put(title, pageSplitter.getPages().size());
+
                             textPaint.setFakeBoldText(false);
                             pageSplitter.append(result.getString(2), textPaint);
 
@@ -214,6 +227,28 @@ public class BookActivity extends AppCompatActivity {
 
                 pagesView.setAdapter(new TextPagerAdapter(getSupportFragmentManager(), pageSplitter.getPages()));
                 pagesView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                pagesView.setCurrentItem(4, false);
+                Log.d("Current item:", String.valueOf(pagesView.getCurrentItem()));
+
+                Log.d("Current hashmap:", new Gson().toJson(chapterPages));
+
+            }
+        });
+
+        pagesView.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                getSupportActionBar().setSubtitle("Stranica " + (position + 1));
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
             }
         });
 

@@ -17,7 +17,6 @@ public class TextPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int i) {
-        Log.d("Stranica", String.valueOf(i));
         return PageFragment.newInstance(pageTexts.get(i));
     }
 

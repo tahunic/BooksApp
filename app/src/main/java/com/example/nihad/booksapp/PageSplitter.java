@@ -22,6 +22,8 @@ public class PageSplitter {
     private int currentLineWidth;
     private int textLineHeight;
 
+    public static boolean initialLoad = true;
+
     public PageSplitter(int pageWidth, int pageHeight, float lineSpacingMultiplier, int lineSpacingExtra) {
         this.pageWidth = pageWidth;
         this.pageHeight = pageHeight;

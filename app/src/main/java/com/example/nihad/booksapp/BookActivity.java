@@ -1,32 +1,37 @@
 package com.example.nihad.booksapp;
 
+import android.content.Intent;
 import android.database.Cursor;
-import android.support.v4.app.FragmentActivity;
+import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextPaint;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.ViewTreeObserver;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class BookActivity extends AppCompatActivity {
+
+    public final static String PAGE = "PAGE";
 
     @BindView(R.id.pages)
     ViewPager pagesView;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
+    private LinkedHashMap<String, Integer> chapterPages;
     private DbHelper dbHelper;
-    private HashMap<String, Integer> chapterPages;
+    private Integer page;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +41,17 @@ public class BookActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Title");
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_bookmark:
+                        Toast.makeText(BookActivity.this, "Clicked", Toast.LENGTH_SHORT);
+                }
+
+                return true;
+            }
+        });
 
         dbHelper = new DbHelper(this);
 //        dbHelper.insertData("Rječitost Kur’ana i istinite radosne vijesti" , ", neka je mir i spasResulullahu, sallallahu alejhi ve sellem, njegovojčasnoj porodici, drugovima i svim njegovim sljedbenicima.U ovoj knjizi kazujemo o najstrpljivijem zatvoreniku uhistoriji. Moleći Svemogućeg Allaha za pomoć, detalje kazivanja crpit ćemo iz časnoga Kur’ana, najjače veze, vječneKnjige, velike Poslanikove, sallallahu alejhi ve sellem, mudžize, upute, svjetlosti, lijeka, milosti, opomene, velikog ikategoričnog dokaza i objašnjenja svega.Izabrao sam kazivanje o Jusufu, alejhis-selam, jer je onojedno od najljepših kazivanja. Štaviše, mnogi učenjaci reklisu da nisu čuli za poučnije i ljepše kazivanje.“Objavljujući ti ovaj Kur’an, Mi tebi o najljepšim događajima kazujemo…” Kažu da je to najljepše kazivanjejer govori o vjerovjesništvu i poslanstvu, kraljevima, trgovini, zatočeništvu, teškoći, izbavljenju, bogatstvu, siromaštvu, grijehu, pokajanju, snovima, stvarnosti; osuđuje razvrat, hvali čednost… Najljepše, jer se sve što je u njemuspomenuto završilo na najljepši način i sretno: poslanik Jusuf, alejhis-selam, od zatvora, preko ugnjetavanja, dospio jedo poslanstva i vlasti, njegovog oca Jakuba, alejhis-selam,Allah, dželle šanuhu, odabrao je i dao da se sjedini njegova");
@@ -194,6 +210,9 @@ public class BookActivity extends AppCompatActivity {
 //                "VodicKrozZivot");
 
 
+        chapterPages = new LinkedHashMap<>();
+        page = getIntent().getIntExtra(PAGE, 0);
+
         // to get ViewPager width and height we have to wait global layout
         pagesView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -203,7 +222,6 @@ public class BookActivity extends AppCompatActivity {
                 TextPaint textPaint = new TextPaint();
                 textPaint.setTextSize(getResources().getDimension(R.dimen.text_size));
 
-                chapterPages = new HashMap<>();
 
                 Cursor result = dbHelper.getData();
                 if(result.getCount() != 0){
@@ -213,7 +231,7 @@ public class BookActivity extends AppCompatActivity {
 
                             String title = result.getString(1);
                             pageSplitter.append(title + "\n\n", textPaint);
-                            chapterPages.put(title, pageSplitter.getPages().size());
+                            chapterPages.put(title, pageSplitter.getPages().size() - 1);
 
                             textPaint.setFakeBoldText(false);
                             pageSplitter.append(result.getString(2), textPaint);
@@ -224,14 +242,17 @@ public class BookActivity extends AppCompatActivity {
                     }
 
                 }
-
                 pagesView.setAdapter(new TextPagerAdapter(getSupportFragmentManager(), pageSplitter.getPages()));
                 pagesView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                pagesView.setCurrentItem(4, false);
-                Log.d("Current item:", String.valueOf(pagesView.getCurrentItem()));
+                pagesView.setCurrentItem(page);
 
-                Log.d("Current hashmap:", new Gson().toJson(chapterPages));
 
+                if(PageSplitter.initialLoad){
+                    PageSplitter.initialLoad = false;
+                    Intent tabbedActivity = new Intent(BookActivity.this, TabbedActivity.class);
+                    tabbedActivity.putExtra(TabbedActivity.CHAPTER_PAGES, new Gson().toJson(chapterPages));
+                    startActivity(tabbedActivity);
+                }
             }
         });
 
@@ -251,7 +272,13 @@ public class BookActivity extends AppCompatActivity {
 
             }
         });
-
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.book_menu, menu);
+        return true;
+    }
+
 
 }

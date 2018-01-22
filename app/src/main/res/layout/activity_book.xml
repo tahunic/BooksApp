@@ -6,14 +6,7 @@
     tools:context="com.example.nihad.booksapp.BookActivity"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    <android.support.v7.widget.Toolbar
-
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary">
-
-    </android.support.v7.widget.Toolbar>
+    <include layout="@layout/toolbar"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pages"
@@ -21,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:overScrollMode="never">
-
     </android.support.v4.view.ViewPager>
 
 </RelativeLayout>

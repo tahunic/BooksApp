@@ -1,18 +1,23 @@
 package com.example.nihad.booksapp;
 
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import butterknife.BindView;
@@ -20,9 +25,17 @@ import butterknife.ButterKnife;
 
 public class TabbedActivity extends AppCompatActivity {
 
-    @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.tabs) TabLayout tabLayout;
-    @BindView(R.id.viewpager) ViewPager viewPager;
+    public final static String CHAPTER_PAGES = "CHAPTER_PAGES";
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.tabs)
+    TabLayout tabLayout;
+    @BindView(R.id.viewpager)
+    ViewPager viewPager;
+
+    public LinkedHashMap<String, Integer> chapterPages;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +47,7 @@ public class TabbedActivity extends AppCompatActivity {
 
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
+
     }
 
     @Override
@@ -59,8 +73,16 @@ public class TabbedActivity extends AppCompatActivity {
     }
 
     private void setupViewPager(ViewPager viewPager) {
+        Type entityType = new TypeToken< LinkedHashMap<String, Integer>>(){}.getType();
+        chapterPages = new Gson().fromJson(getIntent().getStringExtra(CHAPTER_PAGES), entityType);
+
+        Bundle bundle = new Bundle();
+        bundle.putString(CHAPTER_PAGES, new Gson().toJson(chapterPages));
+        ChaptersFragment chaptersFragment = new ChaptersFragment();
+        chaptersFragment.setArguments(bundle);
+
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new ChaptersFragment(), "Odlomci");
+        adapter.addFragment(chaptersFragment, "Odlomci");
         adapter.addFragment(new BookmarksFragment(), "Bookmarks");
         viewPager.setAdapter(adapter);
     }

@@ -1,10 +1,12 @@
 package com.example.nihad.booksapp;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.ActionMenuItemView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextPaint;
 import android.view.Menu;
@@ -18,7 +20,6 @@ import java.util.LinkedHashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class BookActivity extends AppCompatActivity {
 
@@ -29,9 +30,12 @@ public class BookActivity extends AppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
+    ActionMenuItemView menuItem;
+
     private LinkedHashMap<String, Integer> chapterPages;
     private DbHelper dbHelper;
     private Integer page;
+    private Integer currentPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +50,7 @@ public class BookActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_bookmark:
-                        Toast.makeText(BookActivity.this, "Clicked", Toast.LENGTH_SHORT);
+                        toggleBookmark();
                 }
 
                 return true;
@@ -54,8 +58,8 @@ public class BookActivity extends AppCompatActivity {
         });
 
         dbHelper = new DbHelper(this);
-//        dbHelper.insertData("Rječitost Kur’ana i istinite radosne vijesti" , ", neka je mir i spasResulullahu, sallallahu alejhi ve sellem, njegovojčasnoj porodici, drugovima i svim njegovim sljedbenicima.U ovoj knjizi kazujemo o najstrpljivijem zatvoreniku uhistoriji. Moleći Svemogućeg Allaha za pomoć, detalje kazivanja crpit ćemo iz časnoga Kur’ana, najjače veze, vječneKnjige, velike Poslanikove, sallallahu alejhi ve sellem, mudžize, upute, svjetlosti, lijeka, milosti, opomene, velikog ikategoričnog dokaza i objašnjenja svega.Izabrao sam kazivanje o Jusufu, alejhis-selam, jer je onojedno od najljepših kazivanja. Štaviše, mnogi učenjaci reklisu da nisu čuli za poučnije i ljepše kazivanje.“Objavljujući ti ovaj Kur’an, Mi tebi o najljepšim događajima kazujemo…” Kažu da je to najljepše kazivanjejer govori o vjerovjesništvu i poslanstvu, kraljevima, trgovini, zatočeništvu, teškoći, izbavljenju, bogatstvu, siromaštvu, grijehu, pokajanju, snovima, stvarnosti; osuđuje razvrat, hvali čednost… Najljepše, jer se sve što je u njemuspomenuto završilo na najljepši način i sretno: poslanik Jusuf, alejhis-selam, od zatvora, preko ugnjetavanja, dospio jedo poslanstva i vlasti, njegovog oca Jakuba, alejhis-selam,Allah, dželle šanuhu, odabrao je i dao da se sjedini njegova");
-//        dbHelper.insertData("Uvod", "U ime Allaha, Milostivog, Samilosnog!\n" +
+//        dbHelper.insertChapterData("Rječitost Kur’ana i istinite radosne vijesti" , ", neka je mir i spasResulullahu, sallallahu alejhi ve sellem, njegovojčasnoj porodici, drugovima i svim njegovim sljedbenicima.U ovoj knjizi kazujemo o najstrpljivijem zatvoreniku uhistoriji. Moleći Svemogućeg Allaha za pomoć, detalje kazivanja crpit ćemo iz časnoga Kur’ana, najjače veze, vječneKnjige, velike Poslanikove, sallallahu alejhi ve sellem, mudžize, upute, svjetlosti, lijeka, milosti, opomene, velikog ikategoričnog dokaza i objašnjenja svega.Izabrao sam kazivanje o Jusufu, alejhis-selam, jer je onojedno od najljepših kazivanja. Štaviše, mnogi učenjaci reklisu da nisu čuli za poučnije i ljepše kazivanje.“Objavljujući ti ovaj Kur’an, Mi tebi o najljepšim događajima kazujemo…” Kažu da je to najljepše kazivanjejer govori o vjerovjesništvu i poslanstvu, kraljevima, trgovini, zatočeništvu, teškoći, izbavljenju, bogatstvu, siromaštvu, grijehu, pokajanju, snovima, stvarnosti; osuđuje razvrat, hvali čednost… Najljepše, jer se sve što je u njemuspomenuto završilo na najljepši način i sretno: poslanik Jusuf, alejhis-selam, od zatvora, preko ugnjetavanja, dospio jedo poslanstva i vlasti, njegovog oca Jakuba, alejhis-selam,Allah, dželle šanuhu, odabrao je i dao da se sjedini njegova");
+//        dbHelper.insertChapterData("Uvod", "U ime Allaha, Milostivog, Samilosnog!\n" +
 //                "\n" +
 //                "Hvala pripada Allahu,Gospodaru svjetova. Neka su\n" +
 //                "mir i spas Resulullahu, sallallahu alejhi ve sellem,\n" +
@@ -124,7 +128,7 @@ public class BookActivity extends AppCompatActivity {
 //                "obilno nagradi. Allah je jedini Bog i samo se na Nje" +
 //                "ga oslanjam!", "VodicKrozZivot");
 //
-//        dbHelper.insertData("MUDRI SAVJETI", "1. Čovjek se ne treba uznemiriti ako ga dobronamjeran savjetnik ukori zbog greške.\n" +
+//        dbHelper.insertChapterData("MUDRI SAVJETI", "1. Čovjek se ne treba uznemiriti ako ga dobronamjeran savjetnik ukori zbog greške.\n" +
 //                "\n" +
 //                "2. Kušnje jačaju čovjeka, i zato ih treba izdržati, a čovjek ne smije dozvoliti da ga one unište.\n" +
 //                "\n" +
@@ -199,14 +203,14 @@ public class BookActivity extends AppCompatActivity {
 //                "\n" +
 //                "\n", "VodicKrozZivot");
 //
-//        dbHelper.insertData("Ne satiri svoju dušu žalosteći se", "Dugo sam razmišljao o Allahovim riječima: \"...pa ne izgaraj od žalosti za njima...\" (Fatir, 8) i zaključio da one sadrže lijek za mnoge neprijatnosti i probleme u životu. Naći ćeš da neki ljudi teže popravljanju ponašanja onih koji podbacuju u izvršavanju dužnosti, ličnom napretku, upućivanju zalutalog, podnošenju ponašanja nerazumna druga, upućivanju savjeta neposlušnom djetetu, uspostavljanju prijateljske veze s onim koji to ne želi, animiranju lijenog učenika i tako redom, ulažu trud i upinju se, a ako u svojoj namjeri ne uspiju, tuguju, jadikuju i satiru svoju dušu žalosteći se. Doduše, ima i onih koji će se posavjetovati s iskusnima, te će im ovi preporučiti da poduzmu sve potrebne mjere i da svoju energiju usmjere u ispravnom pravcu, na šta će neuspješni reći da su sve poduzeli, ali, eto, nisu uspjeli. Tuga i depresija imaju za posljedicu nerazumno ponašanje koje naposlijetku može dovesti do gubljenja želje za činjenjem drugih, raznovrsnih dobrih djela. Neće imati snage za činjenje dobra onaj ko pretjerano razmišlja o nečemu što ga zaokuplja, a što je odveć beskorisno.\n" +
+//        dbHelper.insertChapterData("Ne satiri svoju dušu žalosteći se", "Dugo sam razmišljao o Allahovim riječima: \"...pa ne izgaraj od žalosti za njima...\" (Fatir, 8) i zaključio da one sadrže lijek za mnoge neprijatnosti i probleme u životu. Naći ćeš da neki ljudi teže popravljanju ponašanja onih koji podbacuju u izvršavanju dužnosti, ličnom napretku, upućivanju zalutalog, podnošenju ponašanja nerazumna druga, upućivanju savjeta neposlušnom djetetu, uspostavljanju prijateljske veze s onim koji to ne želi, animiranju lijenog učenika i tako redom, ulažu trud i upinju se, a ako u svojoj namjeri ne uspiju, tuguju, jadikuju i satiru svoju dušu žalosteći se. Doduše, ima i onih koji će se posavjetovati s iskusnima, te će im ovi preporučiti da poduzmu sve potrebne mjere i da svoju energiju usmjere u ispravnom pravcu, na šta će neuspješni reći da su sve poduzeli, ali, eto, nisu uspjeli. Tuga i depresija imaju za posljedicu nerazumno ponašanje koje naposlijetku može dovesti do gubljenja želje za činjenjem drugih, raznovrsnih dobrih djela. Neće imati snage za činjenje dobra onaj ko pretjerano razmišlja o nečemu što ga zaokuplja, a što je odveć beskorisno.\n" +
 //                "\n" +
 //                "Pa u čemu je onda rješenje ovog problema? Hoće li čovjek šutjeti snužden i nemoćan? Treba li se predati tugovanju? Ne, neće se predati očaju ni tugovanju, neće biti snužden i neće se osjećati nemoćnim, nego će smatrati daje svoj posao besprijekorno obavio i da će ga Plemeniti Allah, Gospodar svjetova, nagraditi za dobročinstvo. K tome, živjet će kao što je i dotad živio i nastojat će činiti dobro.\n" +
 //                "\n" +
 //                "Čitaoče, kad uputiš nekom mudar i umilan savjet, pritom se maksimalno trudeći da popraviš njegovo ponašanje, ali ne uspiješ u tome, sjeti se Božijih riječi: \"I ne tuguj za njima, i neka ti nije teško zbog spletkarenja njihova. Allah je zaista na strani onih koji se Njega boje i grijeha klone i koji dobra djela čine\" (en Nahl, 127, 128), \"...pa ne izgaraj od žalosti za njima...\" (Fatir, 8)",
 //                "VodicKrozZivot");
 //
-//        dbHelper.insertData("Kako treba razumjeti izjave ispravnih prethodnika?", "",
+//        dbHelper.insertChapterData("Kako treba razumjeti izjave ispravnih prethodnika?", "",
 //                "VodicKrozZivot");
 
 
@@ -223,7 +227,7 @@ public class BookActivity extends AppCompatActivity {
                 textPaint.setTextSize(getResources().getDimension(R.dimen.text_size));
 
 
-                Cursor result = dbHelper.getData();
+                Cursor result = dbHelper.getChapterData();
                 if(result.getCount() != 0){
                     while(result.moveToNext()){
                         if(result.getString(3).contentEquals("VodicKrozZivot")){
@@ -257,9 +261,21 @@ public class BookActivity extends AppCompatActivity {
         });
 
         pagesView.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @SuppressLint("RestrictedApi")
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 getSupportActionBar().setSubtitle("Stranica " + (position + 1));
+                currentPage = position;
+                menuItem = findViewById(R.id.action_bookmark);
+
+                if(menuItem != null) {
+                    if(!dbHelper.bookmarkExists(currentPage.toString())){
+                        menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_border_black_24dp));
+                    } else {
+                        menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_black_24dp));
+                    }
+                }
+
             }
 
             @Override
@@ -272,6 +288,25 @@ public class BookActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void toggleBookmark() {
+        menuItem = findViewById(R.id.action_bookmark);
+
+        if(!dbHelper.bookmarkExists(currentPage.toString())){
+            dbHelper.insertBookmarkData(currentPage, "Test", "VodicKrozZivot");
+
+            Toast.makeText(this, "Stranica označena", Toast.LENGTH_SHORT).show();
+            menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_black_24dp));
+        } else {
+            dbHelper.deleteBookmarkData(currentPage.toString());
+
+            Toast.makeText(this, "Oznaka uklonjena", Toast.LENGTH_SHORT).show();
+            menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_border_black_24dp));
+        }
+
+
     }
 
     @Override

@@ -20,10 +20,10 @@
         android:orderInCategory="300"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_bookmark"
-        android:orderInCategory="300"
+    <item android:id="@+id/action_bookmark"
         android:title="Bookmark"
+
+        android:orderInCategory="300"
         android:icon="@drawable/ic_bookmark_border_black_24dp"
-        app:showAsAction="ifRoom"></item>
+        app:showAsAction="always"/>
 </menu>

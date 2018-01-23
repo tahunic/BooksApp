@@ -13,7 +13,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DbHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "booksApp";
-    public static final String TABLE_NAME = "chapter";
+    public static final String TABLE_CHAPTER = "chapter";
+    public static final String TABLE_BOOKMARK = "bookmark";
 
 
     public DbHelper(Context context) {
@@ -22,28 +23,81 @@ public class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TEXT, CONTENT TEXT, BOOK TEXT)");
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_CHAPTER + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TEXT, CONTENT TEXT, BOOK TEXT)");
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_BOOKMARK + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, PAGE INTEGER, CHAPTER TEXT, BOOK TEXT)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CHAPTER);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKMARK);
         onCreate(sqLiteDatabase);
     }
 
-    public void insertData(String name, String content, String book) {
+    public void insertChapterData(String name, String content, String book) {
         SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return;
+        }
+
         ContentValues contentValues = new ContentValues();
         contentValues.put("NAME", name);
         contentValues.put("CONTENT", content);
         contentValues.put("BOOK", book);
-        db.insert(TABLE_NAME, null, contentValues);
+        db.insert(TABLE_CHAPTER, null, contentValues);
     }
 
-    public Cursor getData() {
+    public Cursor getChapterData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        if (db == null) {
+            return null;
+        }
+
+        Cursor result = db.rawQuery("SELECT * FROM " + TABLE_CHAPTER, null);
         return result;
     }
 
+    public void insertBookmarkData(Integer page, String chapter, String book) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return;
+        }
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("PAGE", page);
+        contentValues.put("CHAPTER", chapter);
+        contentValues.put("BOOK", book);
+        db.insert(TABLE_BOOKMARK, null, contentValues);
+    }
+
+    public Cursor getBookmarkData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return null;
+        }
+
+        Cursor result = db.rawQuery("SELECT * FROM " + TABLE_BOOKMARK, null);
+
+        return result;
+    }
+
+    public boolean bookmarkExists(String page) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return false;
+        }
+
+        Cursor result = db.rawQuery("SELECT ID FROM " + TABLE_BOOKMARK + " WHERE PAGE = ?", new String[] { page });
+
+        return result.getCount() != 0;
+    }
+
+    public Integer deleteBookmarkData(String page) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return null;
+        }
+
+        return db.delete(TABLE_BOOKMARK, "PAGE = ?", new String[] { page });
+    }
 }

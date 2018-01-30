@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">BooksApp</string>
-    <string name="pretrazi">Pretraži</string>
+    <string name="idiNaStranicu">Idi na stranicu</string>
     <string name="postavke">Postavke</string>
-    <string name="knjige">Knjige</string>
+    <string name="promijeniKnjigu">Promijeni knjigu</string>
 </resources>

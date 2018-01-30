@@ -1,16 +1,24 @@
 package com.example.nihad.booksapp;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -35,6 +43,7 @@ public class TabbedActivity extends AppCompatActivity {
     ViewPager viewPager;
 
     public LinkedHashMap<String, Integer> chapterPages;
+    private String m_Text = "";
 
 
     @Override
@@ -43,11 +52,29 @@ public class TabbedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_tabbed);
         ButterKnife.bind(this);
 
-        setSupportActionBar(toolbar);
+        setToolbar();
 
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
+    }
 
+    private void setToolbar() {
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(BookActivity.currentBook);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_changeBook:
+                        loadBooksList(); break;
+                    case R.id.action_goToPage:
+                        goToPage(); break;
+
+                }
+
+                return true;
+            }
+        });
     }
 
     @Override
@@ -58,16 +85,7 @@ public class TabbedActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Log.d("Test", "Hello");
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -116,5 +134,45 @@ public class TabbedActivity extends AppCompatActivity {
         }
     }
 
+    private void loadBooksList() {
+        Intent booksCardsActivity = new Intent(this, BooksCardsActivity.class);
+        startActivity(booksCardsActivity);
+    }
 
+
+    private void goToPage() {
+        RelativeLayout linearLayout = new RelativeLayout(TabbedActivity.this);
+        final NumberPicker numberPicker = new NumberPicker(TabbedActivity.this);
+        numberPicker.setMaxValue(BookActivity.pageCount + 1);
+        numberPicker.setMinValue(1);
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(50, 50);
+        RelativeLayout.LayoutParams numPicerParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        numPicerParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+
+        linearLayout.setLayoutParams(params);
+        linearLayout.addView(numberPicker, numPicerParams);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TabbedActivity.this);
+        alertDialogBuilder.setTitle("Odaberi stranicu");
+        alertDialogBuilder.setView(linearLayout);
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("Ok",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent bookActivity = new Intent(TabbedActivity.this, BookActivity.class);
+                                bookActivity.putExtra(BookActivity.PAGE, numberPicker.getValue() - 1);
+                                startActivity(bookActivity);
+                            }
+                        })
+                .setNegativeButton("Poništi",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
 }

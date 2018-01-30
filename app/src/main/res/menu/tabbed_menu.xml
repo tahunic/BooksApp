@@ -4,22 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".TabbedActivity">
 
-    <item android:id="@+id/action_books"
+    <item android:id="@+id/action_changeBook"
 
-        android:title="@string/knjige"
+        android:title="@string/promijeniKnjigu"
         android:orderInCategory="100"
         app:showAsAction="never" />
 
-    <item android:id="@+id/action_search"
+    <item android:id="@+id/action_goToPage"
 
-        android:title="@string/pretrazi"
+        android:title="@string/idiNaStranicu"
         android:orderInCategory="200"
-        app:showAsAction="never" />
-
-    <item android:id="@+id/action_settings"
-
-        android:title="@string/postavke"
-        android:orderInCategory="300"
         app:showAsAction="never" />
 
 </menu>

@@ -17,7 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".TabbedActivity" />
-        <activity android:name=".BookActivity"></activity>
+        <activity android:name=".BookActivity" />
+        <activity android:name=".BooksCardsActivity"></activity>
     </application>
 
 </manifest>

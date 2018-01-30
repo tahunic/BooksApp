@@ -70,6 +70,17 @@ public class DbHelper extends SQLiteOpenHelper {
         db.insert(TABLE_BOOKMARK, null, contentValues);
     }
 
+    public boolean isDatabaseEmpty(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return true;
+        }
+
+        Cursor result = db.rawQuery("SELECT ID FROM " + TABLE_CHAPTER, null);
+
+        return result.getCount() == 0;
+    }
+
     public Cursor getBookmarkData() {
         SQLiteDatabase db = this.getWritableDatabase();
         if (db == null) {

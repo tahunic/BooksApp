@@ -22,8 +22,6 @@ public class PageSplitter {
     private int currentLineWidth;
     private int textLineHeight;
 
-    public static boolean initialLoad = true;
-
     public PageSplitter(int pageWidth, int pageHeight, float lineSpacingMultiplier, int lineSpacingExtra) {
         this.pageWidth = pageWidth;
         this.pageHeight = pageHeight;
@@ -45,20 +43,20 @@ public class PageSplitter {
     public void pageBreak(){
         boolean finished = false;
         while(!finished){
-            if (pageContentHeight + (currentLineHeight * 2) > pageHeight) {
+            if (pageContentHeight + currentLineHeight*4 > pageHeight) {
 
-                TextPaint textPaint = new TextPaint(Typeface.BOLD);
-//                textPaint.setFakeBoldText(true);
-                currentLineHeight = pageHeight - currentLineHeight;
-                currentLine.append("\n");
-                pageContentHeight += currentLineHeight;
-                appendLineToPage(textLineHeight);
-
-                appendTextToLine(String.valueOf(pages.size() + 1), textPaint, 3);
-
-                currentLine.append("\n");
-                pageContentHeight += currentLineHeight;
-                appendLineToPage(textLineHeight);
+//                TextPaint textPaint = new TextPaint(Typeface.BOLD);
+////                textPaint.setFakeBoldText(true);
+//                currentLineHeight = pageHeight - currentLineHeight;
+//                currentLine.append("\n");
+//                pageContentHeight += currentLineHeight;
+//                appendLineToPage(textLineHeight);
+//
+//                appendTextToLine(String.valueOf(pages.size() + 1), textPaint, 3);
+//
+//                currentLine.append("\n");
+//                pageContentHeight += currentLineHeight;
+//                appendLineToPage(textLineHeight);
 
                 pages.add(currentPage);
                 currentPage = new SpannableStringBuilder();
@@ -86,21 +84,21 @@ public class PageSplitter {
     }
 
     private void checkForPageEnd() {
-        if (pageContentHeight + (currentLineHeight * 2) > pageHeight) {
+        if (pageContentHeight + currentLineHeight*4 > pageHeight) {
 
-            TextPaint textPaint = new TextPaint(Typeface.BOLD);
-//            textPaint.setFakeBoldText(true);
-            currentLineHeight = pageHeight - currentLineHeight;
-
-            currentLine.append("\n");
-            pageContentHeight += currentLineHeight;
-            appendLineToPage(textLineHeight);
-
-            appendTextToLine(String.valueOf(pages.size() + 1), textPaint, 3);
-
-            currentLine.append("\n");
-            pageContentHeight += currentLineHeight;
-            appendLineToPage(textLineHeight);
+//            TextPaint textPaint = new TextPaint(Typeface.BOLD);
+////            textPaint.setFakeBoldText(true);
+//            currentLineHeight = pageHeight - currentLineHeight;
+//
+//            currentLine.append("\n");
+//            pageContentHeight += currentLineHeight;
+//            appendLineToPage(textLineHeight);
+//
+//            appendTextToLine(String.valueOf(pages.size() + 1), textPaint, 3);
+//
+//            currentLine.append("\n");
+//            pageContentHeight += currentLineHeight;
+//            appendLineToPage(textLineHeight);
 
 //
             pages.add(currentPage);
@@ -152,5 +150,9 @@ public class PageSplitter {
             spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, spannable.length(), 0);
         }
         return spannable;
+    }
+
+    public Integer getCount() {
+        return pages.size();
     }
 }

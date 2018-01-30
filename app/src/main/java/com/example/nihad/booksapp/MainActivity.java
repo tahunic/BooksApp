@@ -12,7 +12,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent tabbedActivity = new Intent(this, BookActivity.class);
+        Intent tabbedActivity = new Intent(this, BooksCardsActivity.class);
         startActivity(tabbedActivity);
     }
 }

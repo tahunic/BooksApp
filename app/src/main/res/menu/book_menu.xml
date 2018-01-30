@@ -2,28 +2,30 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/action_books"
+    <item android:id="@+id/action_changeBook"
 
-        android:title="@string/knjige"
+        android:title="@string/promijeniKnjigu"
         android:orderInCategory="100"
         app:showAsAction="never" />
 
-    <item android:id="@+id/action_search"
+    <item android:id="@+id/action_goToPage"
 
-        android:title="@string/pretrazi"
+        android:title="@string/idiNaStranicu"
         android:orderInCategory="200"
         app:showAsAction="never" />
 
-    <item android:id="@+id/action_settings"
-
-        android:title="@string/postavke"
-        android:orderInCategory="300"
-        app:showAsAction="never" />
 
     <item android:id="@+id/action_bookmark"
         android:title="Bookmark"
 
-        android:orderInCategory="300"
-        android:icon="@drawable/ic_bookmark_border_black_24dp"
+        android:orderInCategory="500"
+        android:icon="@drawable/ic_bookmark_border_white"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/action_tabs"
+        android:title="Tabs"
+
+        android:orderInCategory="400"
+        android:icon="@drawable/ic_import_contacts"
         app:showAsAction="always"/>
 </menu>

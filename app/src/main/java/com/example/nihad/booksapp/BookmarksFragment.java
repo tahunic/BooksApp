@@ -40,11 +40,12 @@ public class BookmarksFragment extends Fragment {
         bookmarkListView = view.findViewById(R.id.bookmarksList);
 
         list = new ArrayList<>();
+        String a = BookActivity.currentBook;
 
         Cursor result = dbHelper.getBookmarkData();
         if(result.getCount() != 0){
             while(result.moveToNext()){
-                if(result.getString(3).contentEquals("VodicKrozZivot")){
+                if(result.getString(3).contentEquals(BookActivity.currentBook)){
                     list.add(String.valueOf(result.getInt(1) + 1));
                 }
 

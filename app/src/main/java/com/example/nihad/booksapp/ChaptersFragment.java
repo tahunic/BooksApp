@@ -42,16 +42,6 @@ public class ChaptersFragment extends Fragment {
 
         chaptersListView = view.findViewById(R.id.chaptersList);
 
-//        String[] values = new String[] { "Android List View",
-//                "Adapter implementation",
-//                "Simple List View In Android",
-//                "Create List View Android",
-//                "Android Example",
-//                "List View Source Code",
-//                "List View Array Adapter",
-//                "Android Example List View"
-//        };
-
         String[] values = chapterPages.keySet().toArray(new String[0]);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
@@ -63,11 +53,6 @@ public class ChaptersFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // ListView Clicked item value
                 String  itemValue    = (String) chaptersListView.getItemAtPosition(position);
-
-                // Show Alert
-                Toast.makeText(getContext(),
-                        "Stranica :"+chapterPages.get(itemValue)+"  ListItem : " + itemValue , Toast.LENGTH_LONG)
-                        .show();
 
                 Intent bookActivity = new Intent(getActivity(), BookActivity.class);
                 bookActivity.putExtra(BookActivity.PAGE, chapterPages.get(itemValue));

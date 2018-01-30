@@ -101,7 +101,7 @@ public class TabbedActivity extends AppCompatActivity {
 
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(chaptersFragment, "Odlomci");
-        adapter.addFragment(new BookmarksFragment(), "Bookmarks");
+        adapter.addFragment(new BookmarksFragment(), "Oznake");
         viewPager.setAdapter(adapter);
     }
 

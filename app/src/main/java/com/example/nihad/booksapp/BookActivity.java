@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import butterknife.BindView;
@@ -138,8 +139,16 @@ public class BookActivity extends AppCompatActivity {
     private void toggleBookmark() {
         menuItem = findViewById(R.id.action_bookmark);
 
+        String currentChapter = "";
+        for (int i = 0; i < chapterPages.size() - 1; i++) {
+            if(currentPage >= (new ArrayList<Integer>(chapterPages.values())).get(i) && currentPage < (new ArrayList<Integer>(chapterPages.values())).get(i + 1)){
+                currentChapter = (new ArrayList<String>(chapterPages.keySet())).get(i);
+                break;
+            }
+        }
+
         if(!dbHelper.bookmarkExists(currentPage.toString())){
-            dbHelper.insertBookmarkData(currentPage, "Test", currentBook);
+            dbHelper.insertBookmarkData(currentPage, currentChapter, currentBook);
 
             Toast.makeText(this, "Stranica označena", Toast.LENGTH_SHORT).show();
             menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_white));

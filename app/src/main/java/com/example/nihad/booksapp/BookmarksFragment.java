@@ -5,6 +5,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 
@@ -23,7 +28,12 @@ public class BookmarksFragment extends Fragment {
 
     private DbHelper dbHelper;
     ListView bookmarkListView ;
-    ArrayList<String> list;
+//    ArrayList<String> list;
+
+
+    private RecyclerView bookmarksRecyclerView;
+    private BookmarksAdapter bookmarksAdapter;
+    private LinkedHashMap<Integer, String> bookmarksList;
 
     public BookmarksFragment() {
         // Required empty public constructor
@@ -37,38 +47,44 @@ public class BookmarksFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_bookmarks, container, false);
 
         dbHelper = new DbHelper(getActivity());
-        bookmarkListView = view.findViewById(R.id.bookmarksList);
-
-        list = new ArrayList<>();
-        String a = BookActivity.currentBook;
+        bookmarksList = new LinkedHashMap<>();
 
         Cursor result = dbHelper.getBookmarkData();
         if(result.getCount() != 0){
             while(result.moveToNext()){
                 if(result.getString(3).contentEquals(BookActivity.currentBook)){
-                    list.add(String.valueOf(result.getInt(1) + 1));
+                    bookmarksList.put(result.getInt(1), result.getString(2));
                 }
-
             }
         }
 
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
-                R.layout.bookmark_list_item, R.id.bookmarkName, list);
+        bookmarksAdapter = new BookmarksAdapter(bookmarksList);
+        bookmarksRecyclerView = view.findViewById(R.id.bookmarksRecyclerView);
 
-        bookmarkListView.setAdapter(adapter);
-        bookmarkListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+        bookmarksRecyclerView.setLayoutManager(mLayoutManager);
+        bookmarksRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        bookmarksRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
 
-                Integer itemValue = Integer.valueOf(list.get(position)) - 1;
+        bookmarksRecyclerView.setAdapter(bookmarksAdapter);
 
-                Intent bookActivity = new Intent(getActivity(), BookActivity.class);
-                bookActivity.putExtra(BookActivity.PAGE, itemValue);
-                startActivity(bookActivity);
-            }
-        });
+        bookmarksRecyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity().getApplicationContext(), bookmarksRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Integer itemValue    = bookmarksAdapter.getItem(position);
 
+                        Intent bookActivity = new Intent(getActivity(), BookActivity.class);
+                        bookActivity.putExtra(BookActivity.PAGE, itemValue);
+                        startActivity(bookActivity);
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+                    }
+                })
+        );
 
         return view;
     }

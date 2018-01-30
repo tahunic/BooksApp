@@ -92,6 +92,17 @@ public class DbHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    public Cursor getBookmarkChapterByPage(String page) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return null;
+        }
+
+        Cursor result = db.rawQuery("SELECT CHAPTER FROM " + TABLE_BOOKMARK + " WHERE PAGE = ?", new String[] { page });
+
+        return result;
+    }
+
     public boolean bookmarkExists(String page) {
         SQLiteDatabase db = this.getWritableDatabase();
         if (db == null) {

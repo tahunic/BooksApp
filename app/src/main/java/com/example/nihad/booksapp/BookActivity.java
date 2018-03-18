@@ -4,7 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +16,10 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextPaint;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.NumberPicker;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -35,6 +40,8 @@ public class BookActivity extends AppCompatActivity {
     ViewPager pagesView;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     ActionMenuItemView menuItem;
 
@@ -187,36 +194,7 @@ public class BookActivity extends AppCompatActivity {
         pagesView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                PageSplitter pageSplitter = new PageSplitter(pagesView.getWidth(), pagesView.getHeight(), 1, 0);
-
-                TextPaint textPaint = new TextPaint();
-                textPaint.setTextSize(getResources().getDimension(R.dimen.text_size));
-
-
-                Cursor result = dbHelper.getChapterData();
-                if(result.getCount() != 0){
-                    while(result.moveToNext()){
-                        if(result.getString(3).contentEquals(currentBook)){
-                            textPaint.setFakeBoldText(true);
-
-                            String title = result.getString(1);
-                            pageSplitter.append(title + "\n\n", textPaint);
-                            chapterPages.put(title, pageSplitter.getPages().size() - 1);
-
-                            textPaint.setFakeBoldText(false);
-                            pageSplitter.append(result.getString(2), textPaint);
-
-                            pageSplitter.pageBreak();
-                        }
-
-                    }
-
-                }
-                pageCount = pageSplitter.getCount();
-                pagesView.setAdapter(new TextPagerAdapter(getSupportFragmentManager(), pageSplitter.getPages()));
-                pagesView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                pagesView.setCurrentItem(page);
-
+                new LoadBookAsync().execute(this);
             }
         });
 
@@ -251,4 +229,57 @@ public class BookActivity extends AppCompatActivity {
     }
 
 
+    private class LoadBookAsync extends AsyncTask<ViewTreeObserver.OnGlobalLayoutListener, Integer, String> {
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected String doInBackground(final ViewTreeObserver.OnGlobalLayoutListener... onGlobalLayoutListeners) {
+            final PageSplitter pageSplitter = new PageSplitter(pagesView.getWidth(), pagesView.getHeight(), 1, 0);
+
+            TextPaint textPaint = new TextPaint();
+            textPaint.setTextSize(getResources().getDimension(R.dimen.text_size));
+
+
+            Cursor result = dbHelper.getChapterData();
+            if(result.getCount() != 0){
+                while(result.moveToNext()){
+                    if(result.getString(3).contentEquals(currentBook)){
+                        textPaint.setFakeBoldText(true);
+
+                        String title = result.getString(1);
+                        pageSplitter.append(title + "\n\n", textPaint);
+                        chapterPages.put(title, pageSplitter.getPages().size() - 1);
+
+                        textPaint.setFakeBoldText(false);
+                        pageSplitter.append(result.getString(2), textPaint);
+
+                        pageSplitter.pageBreak();
+                    }
+
+                }
+
+            }
+            pageCount = pageSplitter.getCount();
+
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    pagesView.setAdapter(new TextPagerAdapter(getSupportFragmentManager(), pageSplitter.getPages()));
+                    pagesView.getViewTreeObserver().removeOnGlobalLayoutListener(onGlobalLayoutListeners[0]);
+                    pagesView.setCurrentItem(page);
+                }
+            });
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+    }
 }

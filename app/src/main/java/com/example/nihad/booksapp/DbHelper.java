@@ -110,8 +110,10 @@ public class DbHelper extends SQLiteOpenHelper {
         }
 
         Cursor result = db.rawQuery("SELECT ID FROM " + TABLE_BOOKMARK + " WHERE PAGE = ?", new String[] { page });
+        boolean exists = result.getCount() != 0;
+        result.close();
 
-        return result.getCount() != 0;
+        return exists;
     }
 
     public Integer deleteBookmarkData(String page) {

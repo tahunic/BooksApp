@@ -1,16 +1,13 @@
 package com.example.nihad.booksapp;
 
 import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.support.v4.view.ViewPager;
-import android.text.TextPaint;
-import android.view.View;
-import android.view.ViewTreeObserver;
 
-import com.google.gson.Gson;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.util.LinkedHashMap;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 
 /**
  * Created by nihad on 27/01/2018.
@@ -18,9 +15,11 @@ import java.util.LinkedHashMap;
 
 public class BookLoader {
     DbHelper dbHelper;
+    Context context;
 
     public BookLoader(Context context) {
         this.dbHelper = new DbHelper(context);
+        this.context = context;
     }
 
     public void insertData() {
@@ -676,8 +675,43 @@ public class BookLoader {
                     "Vodič kroz život");
 
 
+            JSONObject json = null;
+            try {
+                json = new JSONObject(readJSONFromAsset());
+                int length = json.getJSONArray("KnjigaONepravednimLjudima").length();
+                Iterator<String> keys;
+
+                for (int i = 0; i < length; i++) {
+                    keys  = json.getJSONArray("KnjigaONepravednimLjudima").getJSONObject(i).keys();
+
+                    for (String key; keys.hasNext(); ) {
+                        key = keys.next();
+
+                        String content = json.getJSONArray("KnjigaONepravednimLjudima").getJSONObject(i).getString(key);
+                        dbHelper.insertChapterData(key,  content, "Knjiga o nepravednim ljudima");
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
     }
 
+    public String readJSONFromAsset() {
+        String json = null;
+        try {
+            InputStream is = context.getAssets().open("knjiga o nepravednim ljudima.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
 }

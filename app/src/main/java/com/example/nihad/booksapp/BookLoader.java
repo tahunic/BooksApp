@@ -677,21 +677,36 @@ public class BookLoader {
 
             JSONObject json = null;
             try {
-                json = new JSONObject(readJSONFromAsset());
-                int length = json.getJSONArray("KnjigaONepravednimLjudima").length();
+                json = new JSONObject(readJSONFromAsset("books.json"));
+                String bookName = "Knjiga o nepravednim ljudima";
+                int length = json.getJSONArray(bookName).length();
                 Iterator<String> keys;
 
                 for (int i = 0; i < length; i++) {
-                    keys  = json.getJSONArray("KnjigaONepravednimLjudima").getJSONObject(i).keys();
+                    keys  = json.getJSONArray(bookName).getJSONObject(i).keys();
 
                     for (String key; keys.hasNext(); ) {
                         key = keys.next();
 
-                        String content = json.getJSONArray("KnjigaONepravednimLjudima").getJSONObject(i).getString(key);
-                        dbHelper.insertChapterData(key,  content, "Knjiga o nepravednim ljudima");
+                        String content = json.getJSONArray(bookName).getJSONObject(i).getString(key);
+                        dbHelper.insertChapterData(key,  content, bookName);
                     }
                 }
 
+                json = new JSONObject(readJSONFromAsset("books.json"));
+                bookName = "Najstrpljiviji zatvorenik";
+                length = json.getJSONArray(bookName).length();
+
+                for (int i = 0; i < length; i++) {
+                    keys  = json.getJSONArray(bookName).getJSONObject(i).keys();
+
+                    for (String key; keys.hasNext(); ) {
+                        key = keys.next();
+
+                        String content = json.getJSONArray(bookName).getJSONObject(i).getString(key);
+                        dbHelper.insertChapterData(key,  content, bookName);
+                    }
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -699,10 +714,10 @@ public class BookLoader {
 
     }
 
-    public String readJSONFromAsset() {
+    public String readJSONFromAsset(String name) {
         String json = null;
         try {
-            InputStream is = context.getAssets().open("knjiga o nepravednim ljudima.json");
+            InputStream is = context.getAssets().open(name);
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);

@@ -20,7 +20,7 @@ public class BooksCardsActivity extends AppCompatActivity {
         initData();
 
         HorizontalInfiniteCycleViewPager pager = findViewById(R.id.horizontal_cycle);
-        CardAdapter adapter = new CardAdapter(listImages, getBaseContext());
+        CardAdapter adapter = new CardAdapter(listImages, BooksCardsActivity.this);
 
         pager.setAdapter(adapter);
     }

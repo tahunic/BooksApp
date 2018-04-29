@@ -238,7 +238,7 @@ public class BookActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(final ViewTreeObserver.OnGlobalLayoutListener... onGlobalLayoutListeners) {
-            final PageSplitter pageSplitter = new PageSplitter(pagesView.getWidth(), pagesView.getHeight(), 1, 0);
+            final PageSplitter pageSplitter = new PageSplitter(pagesView.getWidth(), pagesView.getHeight(), 1, 5);
 
             TextPaint textPaint = new TextPaint();
             textPaint.setTextSize(getResources().getDimension(R.dimen.text_size));

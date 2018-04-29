@@ -23,8 +23,8 @@ public class PageSplitter {
     private int textLineHeight;
 
     public PageSplitter(int pageWidth, int pageHeight, float lineSpacingMultiplier, int lineSpacingExtra) {
-        this.pageWidth = pageWidth;
-        this.pageHeight = pageHeight;
+        this.pageWidth = pageWidth - 200;
+        this.pageHeight = pageHeight - 200;
         this.lineSpacingMultiplier = lineSpacingMultiplier;
         this.lineSpacingExtra = lineSpacingExtra;
     }
@@ -43,7 +43,7 @@ public class PageSplitter {
     public void pageBreak(){
         boolean finished = false;
         while(!finished){
-            if (pageContentHeight + currentLineHeight*4 > pageHeight) {
+            if (pageContentHeight + currentLineHeight > pageHeight) {
 
 //                TextPaint textPaint = new TextPaint(Typeface.BOLD);
 ////                textPaint.setFakeBoldText(true);
@@ -84,7 +84,7 @@ public class PageSplitter {
     }
 
     private void checkForPageEnd() {
-        if (pageContentHeight + currentLineHeight*4 > pageHeight) {
+        if (pageContentHeight + currentLineHeight > pageHeight) {
 
 //            TextPaint textPaint = new TextPaint(Typeface.BOLD);
 ////            textPaint.setFakeBoldText(true);

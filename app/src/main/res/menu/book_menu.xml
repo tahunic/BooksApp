@@ -14,6 +14,12 @@
         android:orderInCategory="200"
         app:showAsAction="never" />
 
+    <item android:id="@+id/action_changeFont"
+
+        android:title="@string/changeFont"
+        android:orderInCategory="200"
+        app:showAsAction="never" />
+
 
     <item android:id="@+id/action_bookmark"
         android:title="Bookmark"

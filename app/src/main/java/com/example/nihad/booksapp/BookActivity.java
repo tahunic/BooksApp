@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,19 +15,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.ActionMenuItemView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextPaint;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,6 +42,7 @@ public class BookActivity extends AppCompatActivity {
 
     public final static String PAGE = "PAGE";
     public final static String BOOK_POSITION = "BOOK_POSITION";
+    public final static String FONT_SIZE = "FONT_SIZE";
 
     @BindView(R.id.pages)
     ViewPager pagesView;
@@ -51,9 +59,11 @@ public class BookActivity extends AppCompatActivity {
     private Integer currentPage;
     private Integer bookPosition;
     private BookLoader bookLoader;
+    private boolean didLoad;
 
     public static String currentBook;
     public static Integer pageCount;
+    public static Integer fontSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +77,7 @@ public class BookActivity extends AppCompatActivity {
         bookLoader = new BookLoader(this);
         bookLoader.insertData();
         setCurrentBook();
+        setFontSize();
 
         setPageViewer();
         setToolbar();
@@ -80,13 +91,20 @@ public class BookActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_bookmark:
-                        toggleBookmark(); break;
+                        toggleBookmark();
+                        break;
                     case R.id.action_changeBook:
-                        loadBooksList(); break;
+                        loadBooksList();
+                        break;
                     case R.id.action_tabs:
-                        openTabs(); break;
+                        openTabs();
+                        break;
                     case R.id.action_goToPage:
-                        goToPage(); break;
+                        goToPage();
+                        break;
+                    case R.id.action_changeFont:
+                        changeFont();
+                        break;
 
                 }
 
@@ -117,7 +135,7 @@ public class BookActivity extends AppCompatActivity {
         numPicerParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
         linearLayout.setLayoutParams(params);
-        linearLayout.addView(numberPicker,numPicerParams);
+        linearLayout.addView(numberPicker, numPicerParams);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(BookActivity.this);
         alertDialogBuilder.setTitle("Odaberi stranicu");
@@ -142,19 +160,87 @@ public class BookActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    private void changeFont() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Veličina slova");
+        alert.setMessage("");
+
+        LinearLayout linear = new LinearLayout(this);
+
+        linear.setOrientation(LinearLayout.VERTICAL);
+        final TextView text = new TextView(this);
+        text.setText(String.valueOf(fontSize));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            text.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        }
+        text.setPadding(10, 10, 10, 10);
+
+        final SeekBar seekBar = new SeekBar(this);
+        final int step = 1;
+        final int max = 24;
+        final int min = 16;
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (seekBar != null) {
+                    seekBar.setMax((max - min) / step);
+                    seekBar.setProgress(fontSize - 16);
+                }
+            }
+        });
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int value = min + (progress * step);
+                text.setText(String.valueOf(value));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        linear.addView(seekBar);
+        linear.addView(text);
+
+        alert.setView(linear);
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Intent refresh = new Intent(BookActivity.this, BookActivity.class);
+                refresh.putExtra(BookActivity.FONT_SIZE, min + (seekBar.getProgress() * step));
+                startActivity(refresh);
+            }
+        });
+        alert.setNegativeButton("Poništi", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+            }
+        });
+
+        alert.show();
+    }
+
     @SuppressLint("RestrictedApi")
     private void toggleBookmark() {
         menuItem = findViewById(R.id.action_bookmark);
 
         String currentChapter = "";
         for (int i = 0; i < chapterPages.size() - 1; i++) {
-            if(currentPage >= (new ArrayList<Integer>(chapterPages.values())).get(i) && currentPage < (new ArrayList<Integer>(chapterPages.values())).get(i + 1)){
+            if (currentPage >= (new ArrayList<Integer>(chapterPages.values())).get(i) && currentPage < (new ArrayList<Integer>(chapterPages.values())).get(i + 1)) {
                 currentChapter = (new ArrayList<String>(chapterPages.keySet())).get(i);
                 break;
             }
         }
 
-        if(!dbHelper.bookmarkExists(currentPage.toString())){
+        if (!dbHelper.bookmarkExists(currentPage.toString())) {
             dbHelper.insertBookmarkData(currentPage, currentChapter, currentBook);
 
             Toast.makeText(this, "Stranica označena", Toast.LENGTH_SHORT).show();
@@ -171,17 +257,24 @@ public class BookActivity extends AppCompatActivity {
     private void setCurrentBook() {
         bookPosition = getIntent().getIntExtra(BOOK_POSITION, -1);
 
-        if(bookPosition == -1)
+        if (bookPosition == -1)
             return;
 
-        switch (bookPosition){
+        switch (bookPosition) {
             case 0:
-                currentBook = "Knjiga o nepravednim ljudima"; break;
+                currentBook = "Knjiga o nepravednim ljudima";
+                break;
             case 1:
-                currentBook = "Najstrpljiviji zatvorenik"; break;
+                currentBook = "Najstrpljiviji zatvorenik";
+                break;
             case 2:
-                currentBook = "Vodič kroz život"; break;
+                currentBook = "Vodič kroz život";
+                break;
         }
+    }
+
+    private void setFontSize() {
+        fontSize = getIntent().getIntExtra(FONT_SIZE, 18);
     }
 
     @Override
@@ -206,8 +299,8 @@ public class BookActivity extends AppCompatActivity {
                 currentPage = position;
                 menuItem = findViewById(R.id.action_bookmark);
 
-                if(menuItem != null) {
-                    if(!dbHelper.bookmarkExists(currentPage.toString())){
+                if (menuItem != null) {
+                    if (!dbHelper.bookmarkExists(currentPage.toString())) {
                         menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_border_white));
                     } else {
                         menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_white));
@@ -238,16 +331,18 @@ public class BookActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(final ViewTreeObserver.OnGlobalLayoutListener... onGlobalLayoutListeners) {
+            if (didLoad)
+                return null;
+
             final PageSplitter pageSplitter = new PageSplitter(pagesView.getWidth(), pagesView.getHeight(), 1, 5);
 
             TextPaint textPaint = new TextPaint();
-            textPaint.setTextSize(getResources().getDimension(R.dimen.text_size));
-
+            textPaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fontSize, getResources().getDisplayMetrics()));
 
             Cursor result = dbHelper.getChapterData();
-            if(result.getCount() != 0){
-                while(result.moveToNext()){
-                    if(result.getString(3).contentEquals(currentBook)){
+            if (result.getCount() != 0) {
+                while (result.moveToNext()) {
+                    if (result.getString(3).contentEquals(currentBook)) {
                         textPaint.setFakeBoldText(true);
 
                         String title = result.getString(1);
@@ -259,10 +354,9 @@ public class BookActivity extends AppCompatActivity {
 
                         pageSplitter.pageBreak();
                     }
-
                 }
-
             }
+            didLoad = true;
             pageCount = pageSplitter.getCount();
 
             new Handler(Looper.getMainLooper()).post(new Runnable() {

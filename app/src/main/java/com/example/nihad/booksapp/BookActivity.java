@@ -164,7 +164,7 @@ public class BookActivity extends AppCompatActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         alert.setTitle("Veličina slova");
-        alert.setMessage("");
+        alert.setMessage("Nakon promjene sve označene stranice će biti obrisane");
 
         LinearLayout linear = new LinearLayout(this);
 
@@ -177,6 +177,7 @@ public class BookActivity extends AppCompatActivity {
         text.setPadding(10, 10, 10, 10);
 
         final SeekBar seekBar = new SeekBar(this);
+        seekBar.setPadding(50,50,50,0);
         final int step = 1;
         final int max = 24;
         final int min = 16;
@@ -215,6 +216,9 @@ public class BookActivity extends AppCompatActivity {
         alert.setView(linear);
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+                // Check if font size has changed
+                if(fontSize != min + (seekBar.getProgress() * step))
+                    dbHelper.deleteAllBookmarks(currentBook);
                 Intent refresh = new Intent(BookActivity.this, BookActivity.class);
                 refresh.putExtra(BookActivity.FONT_SIZE, min + (seekBar.getProgress() * step));
                 startActivity(refresh);
@@ -240,13 +244,13 @@ public class BookActivity extends AppCompatActivity {
             }
         }
 
-        if (!dbHelper.bookmarkExists(currentPage.toString())) {
+        if (!dbHelper.bookmarkExists(currentPage.toString(), currentBook)) {
             dbHelper.insertBookmarkData(currentPage, currentChapter, currentBook);
 
             Toast.makeText(this, "Stranica označena", Toast.LENGTH_SHORT).show();
             menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_white));
         } else {
-            dbHelper.deleteBookmarkData(currentPage.toString());
+            dbHelper.deleteBookmarkData(currentPage.toString(), currentBook);
 
             Toast.makeText(this, "Oznaka uklonjena", Toast.LENGTH_SHORT).show();
             menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_border_white));
@@ -300,7 +304,7 @@ public class BookActivity extends AppCompatActivity {
                 menuItem = findViewById(R.id.action_bookmark);
 
                 if (menuItem != null) {
-                    if (!dbHelper.bookmarkExists(currentPage.toString())) {
+                    if (!dbHelper.bookmarkExists(currentPage.toString(), currentBook)) {
                         menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_border_white));
                     } else {
                         menuItem.setIcon(getResources().getDrawable(R.drawable.ic_bookmark_white));

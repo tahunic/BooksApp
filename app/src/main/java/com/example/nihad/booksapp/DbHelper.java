@@ -103,25 +103,34 @@ public class DbHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public boolean bookmarkExists(String page) {
+    public boolean bookmarkExists(String page, String book) {
         SQLiteDatabase db = this.getWritableDatabase();
         if (db == null) {
             return false;
         }
 
-        Cursor result = db.rawQuery("SELECT ID FROM " + TABLE_BOOKMARK + " WHERE PAGE = ?", new String[] { page });
+        Cursor result = db.rawQuery("SELECT ID FROM " + TABLE_BOOKMARK + " WHERE PAGE = ? AND BOOK = ?", new String[] { page, book });
         boolean exists = result.getCount() != 0;
         result.close();
 
         return exists;
     }
 
-    public Integer deleteBookmarkData(String page) {
+    public Integer deleteBookmarkData(String page, String book) {
         SQLiteDatabase db = this.getWritableDatabase();
         if (db == null) {
             return null;
         }
 
-        return db.delete(TABLE_BOOKMARK, "PAGE = ?", new String[] { page });
+        return db.delete(TABLE_BOOKMARK, "PAGE = ? AND BOOK = ?", new String[] { page, book });
+    }
+
+    public void deleteAllBookmarks(String book) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return;
+        }
+
+        db.delete(TABLE_BOOKMARK, "BOOK = ?", new String[] { book });
     }
 }

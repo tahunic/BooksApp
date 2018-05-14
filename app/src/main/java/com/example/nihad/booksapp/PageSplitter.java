@@ -1,10 +1,12 @@
 package com.example.nihad.booksapp;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.text.style.StyleSpan;
+import android.util.TypedValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +24,14 @@ public class PageSplitter {
     private int currentLineWidth;
     private int textLineHeight;
 
-    public PageSplitter(int pageWidth, int pageHeight, float lineSpacingMultiplier, int lineSpacingExtra) {
-        this.pageWidth = pageWidth - 200;
-        this.pageHeight = pageHeight - 200;
+    public PageSplitter(int pageWidth, int pageHeight, float lineSpacingMultiplier, int lineSpacingExtra, Context context) {
+        this.pageWidth = (int) (pageWidth - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, context.getResources().getDisplayMetrics()));
+        this.pageHeight = (int) (pageHeight - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, context.getResources().getDisplayMetrics()));
+//        this.pageWidth = pageWidth;
+//        this.pageHeight = pageHeight;
+
         this.lineSpacingMultiplier = lineSpacingMultiplier;
-        this.lineSpacingExtra = lineSpacingExtra;
+        this.lineSpacingExtra = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, lineSpacingExtra, context.getResources().getDisplayMetrics()) + 1;
     }
 
     public void append(String text, TextPaint textPaint) {
@@ -44,20 +49,6 @@ public class PageSplitter {
         boolean finished = false;
         while(!finished){
             if (pageContentHeight + currentLineHeight > pageHeight) {
-
-//                TextPaint textPaint = new TextPaint(Typeface.BOLD);
-////                textPaint.setFakeBoldText(true);
-//                currentLineHeight = pageHeight - currentLineHeight;
-//                currentLine.append("\n");
-//                pageContentHeight += currentLineHeight;
-//                appendLineToPage(textLineHeight);
-//
-//                appendTextToLine(String.valueOf(pages.size() + 1), textPaint, 3);
-//
-//                currentLine.append("\n");
-//                pageContentHeight += currentLineHeight;
-//                appendLineToPage(textLineHeight);
-
                 pages.add(currentPage);
                 currentPage = new SpannableStringBuilder();
                 pageContentHeight = 0;
@@ -85,22 +76,6 @@ public class PageSplitter {
 
     private void checkForPageEnd() {
         if (pageContentHeight + currentLineHeight > pageHeight) {
-
-//            TextPaint textPaint = new TextPaint(Typeface.BOLD);
-////            textPaint.setFakeBoldText(true);
-//            currentLineHeight = pageHeight - currentLineHeight;
-//
-//            currentLine.append("\n");
-//            pageContentHeight += currentLineHeight;
-//            appendLineToPage(textLineHeight);
-//
-//            appendTextToLine(String.valueOf(pages.size() + 1), textPaint, 3);
-//
-//            currentLine.append("\n");
-//            pageContentHeight += currentLineHeight;
-//            appendLineToPage(textLineHeight);
-
-//
             pages.add(currentPage);
             currentPage = new SpannableStringBuilder();
             pageContentHeight = 0;
@@ -109,10 +84,17 @@ public class PageSplitter {
 
     private void appendWord(String appendedText, TextPaint textPaint) {
         int textWidth = (int) Math.ceil(textPaint.measureText(appendedText));
+
         if (currentLineWidth + textWidth >= pageWidth) {
             checkForPageEnd();
             appendLineToPage(textLineHeight);
         }
+
+//        if(appendedText == "" || appendedText == " "){
+//            checkForPageEnd();
+//            appendLineToPage(textLineHeight);
+//        }
+
         appendTextToLine(appendedText, textPaint, textWidth);
     }
 
@@ -134,6 +116,7 @@ public class PageSplitter {
     public List<CharSequence> getPages() {
         List<CharSequence> copyPages = new ArrayList<CharSequence>(pages);
         SpannableStringBuilder lastPage = new SpannableStringBuilder(currentPage);
+
         if (pageContentHeight + currentLineHeight > pageHeight) {
             copyPages.add(lastPage);
             lastPage = new SpannableStringBuilder();

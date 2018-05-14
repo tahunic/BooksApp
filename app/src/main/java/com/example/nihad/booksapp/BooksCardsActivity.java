@@ -26,8 +26,8 @@ public class BooksCardsActivity extends AppCompatActivity {
     }
 
     private void initData() {
+        listImages.add(R.drawable.vodic_kroz_zivot);
         listImages.add(R.drawable.knjiga_o_nepravednim_ljudima);
         listImages.add(R.drawable.najstrpljiviji_zatvorenik_u_historiji);
-        listImages.add(R.drawable.vodic_kroz_zivot);
     }
 }

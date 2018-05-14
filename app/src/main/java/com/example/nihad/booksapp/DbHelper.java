@@ -15,6 +15,7 @@ public class DbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "booksApp";
     public static final String TABLE_CHAPTER = "chapter";
     public static final String TABLE_BOOKMARK = "bookmark";
+    public static final String TABLE_FONT = "font";
 
 
     public DbHelper(Context context) {
@@ -25,12 +26,14 @@ public class DbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_CHAPTER + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, NAME TEXT, CONTENT TEXT, BOOK TEXT)");
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_BOOKMARK + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, PAGE INTEGER, CHAPTER TEXT, BOOK TEXT)");
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_FONT + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, FONTSIZE INTEGER, FONTFAMILY TEXT)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CHAPTER);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKMARK);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_FONT);
         onCreate(sqLiteDatabase);
     }
 
@@ -132,5 +135,27 @@ public class DbHelper extends SQLiteOpenHelper {
         }
 
         db.delete(TABLE_BOOKMARK, "BOOK = ?", new String[] { book });
+    }
+
+    public void insertFontSizeData(String fontsize) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return;
+        }
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("FONTSIZE", fontsize);
+        db.delete(TABLE_FONT, null, new String[] { });
+        db.insert(TABLE_FONT, null, contentValues);
+    }
+
+    public Cursor getFontSizeData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (db == null) {
+            return null;
+        }
+
+        Cursor result = db.rawQuery("SELECT FONTSIZE FROM " + TABLE_FONT, null);
+        return result;
     }
 }

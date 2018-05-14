@@ -129,6 +129,7 @@ public class BookActivity extends AppCompatActivity {
         final NumberPicker numberPicker = new NumberPicker(BookActivity.this);
         numberPicker.setMaxValue(BookActivity.pageCount + 1);
         numberPicker.setMinValue(1);
+        numberPicker.setValue(currentPage + 1);
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(50, 50);
         RelativeLayout.LayoutParams numPicerParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -179,15 +180,15 @@ public class BookActivity extends AppCompatActivity {
         final SeekBar seekBar = new SeekBar(this);
         seekBar.setPadding(50,50,50,0);
         final int step = 1;
-        final int max = 24;
-        final int min = 16;
+        final int max = 22;
+        final int min = 14;
 
         new Handler().post(new Runnable() {
             @Override
             public void run() {
                 if (seekBar != null) {
                     seekBar.setMax((max - min) / step);
-                    seekBar.setProgress(fontSize - 16);
+                    seekBar.setProgress(fontSize - 14);
                 }
             }
         });
@@ -216,11 +217,16 @@ public class BookActivity extends AppCompatActivity {
         alert.setView(linear);
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+                Integer value = min + (seekBar.getProgress() * step);
+
                 // Check if font size has changed
-                if(fontSize != min + (seekBar.getProgress() * step))
+                if(fontSize != value){
                     dbHelper.deleteAllBookmarks(currentBook);
+                    dbHelper.insertFontSizeData(String.valueOf(value));
+                }
+
                 Intent refresh = new Intent(BookActivity.this, BookActivity.class);
-                refresh.putExtra(BookActivity.FONT_SIZE, min + (seekBar.getProgress() * step));
+                refresh.putExtra(BookActivity.FONT_SIZE, value);
                 startActivity(refresh);
             }
         });
@@ -266,19 +272,30 @@ public class BookActivity extends AppCompatActivity {
 
         switch (bookPosition) {
             case 0:
-                currentBook = "Knjiga o nepravednim ljudima";
+                currentBook = "Vodič kroz život";
                 break;
             case 1:
-                currentBook = "Najstrpljiviji zatvorenik";
+                currentBook = "Knjiga o nepravednim ljudima";
                 break;
             case 2:
-                currentBook = "Vodič kroz život";
+                currentBook = "Najstrpljiviji zatvorenik";
                 break;
         }
     }
 
     private void setFontSize() {
-        fontSize = getIntent().getIntExtra(FONT_SIZE, 18);
+        fontSize = getIntent().getIntExtra(FONT_SIZE, getFontSize());
+    }
+
+    private int getFontSize() {
+        Cursor result = dbHelper.getFontSizeData();
+
+        if(result.getCount() == 0)
+            return 16;
+
+        result.moveToFirst();
+        Integer fontSize = result.getInt(0);
+        return fontSize;
     }
 
     @Override
@@ -338,7 +355,7 @@ public class BookActivity extends AppCompatActivity {
             if (didLoad)
                 return null;
 
-            final PageSplitter pageSplitter = new PageSplitter(pagesView.getWidth(), pagesView.getHeight(), 1, 5);
+            final PageSplitter pageSplitter = new PageSplitter(pagesView.getWidth(), pagesView.getHeight(), 1, 5, BookActivity.this);
 
             TextPaint textPaint = new TextPaint();
             textPaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fontSize, getResources().getDisplayMetrics()));
@@ -355,6 +372,7 @@ public class BookActivity extends AppCompatActivity {
 
                         textPaint.setFakeBoldText(false);
                         pageSplitter.append(result.getString(2), textPaint);
+                        pageSplitter.append("\n", textPaint);
 
                         pageSplitter.pageBreak();
                     }
